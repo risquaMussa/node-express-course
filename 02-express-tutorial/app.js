@@ -1,9 +1,25 @@
 //console.log('Express Tutorial')
 const express = require("express"); // Import express
 const app = express(); // Create app instance
-const { products } = require("./data");
+const { products, people } = require("./data");
+const path = require("path");
+
+const peopleRoutes = require("./routes/people");
 
 app.use(express.static("./public")); //to serve static files like index.html
+
+//week 4
+function logger(req, res, next) {
+  const time = new Date().toISOString();
+  console.log(`[${time}] ${req.method} ${req.url}`);
+  next();
+}
+
+app.use(express.static(path.join(__dirname, "methods-public")));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(logger);
 
 //to test the route
 app.get("/api/v1/test", (req, res) => {
@@ -49,6 +65,27 @@ app.get("/api/v1/query", (req, res) => {
   res.json(result);
 });
 
+//week 4
+// app.get("/api/v1/people", (req, res) => {
+//   res.json({ success: true, data: people });
+// });
+
+// //post
+// app.post("/api/v1/people", (req, res) => {
+//   const { name } = req.body;
+//   if (!name) {
+//     return res
+//       .status(400)
+//       .json({ success: false, message: "Please provide a name" });
+//   }
+
+//   const newPerson = { id: people.length + 1, name };
+//   people.push(newPerson);
+
+//   res.status(201).json({ success: true, data: newPerson });
+// });
+
+app.use("/api/v1/people", peopleRoutes);
 //catch all error
 app.all("*", (req, res) => {
   res.status(404).send("Page not found");
